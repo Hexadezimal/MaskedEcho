@@ -18,7 +18,7 @@ public class Plants : MonoBehaviour
 
 
     private bool isBurning;
-    private float giveLife = 5f;
+    private float giveLife = 10f;
     private bool playerNearby;
     private float healthBeforeBurn;
 
@@ -28,6 +28,7 @@ public class Plants : MonoBehaviour
 
     void Start()
     {
+        RainDrops.SetActive(false);
         healthBar.SetMaxHealth(MaxHealth);
         healthBar.SetHealth(Health);
         UpdateMaterial();
