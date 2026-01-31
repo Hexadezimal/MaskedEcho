@@ -14,7 +14,7 @@ public class BurnTest : MonoBehaviour
     void Start()
     {
         Shader.SetGlobalFloat("_BurnGrade",-0.01f);
-        burnMaxValue = testObject.GetComponent<Renderer>().material.GetFloat("_BurnGrade");
+        //burnMaxValue = testObject.GetComponent<Renderer>().material.GetFloat("_BurnGrade");
     }
 
     // Update is called once per frame
