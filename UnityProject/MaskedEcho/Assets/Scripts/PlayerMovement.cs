@@ -55,7 +55,7 @@ public class PlayerMovement : MonoBehaviour
 
 
     private Vector3 moveDirection = Vector3.zero;
-    private float rotationX = 0;
+    //private float rotationX = 0;
     private CharacterController characterController;
 
     private bool canMove = true;
