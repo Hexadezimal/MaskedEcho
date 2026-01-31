@@ -5,17 +5,10 @@ using UnityEngine.SceneManagement;
 
 public class StartUI : MonoBehaviour
 {
-    public GameObject startMenu;
-    public GameObject aboutMenu;
-    public GameObject creditsMenu;
-
     // Start is called before the first frame update
     void Start()
     {
-        //Setzt alle Seiten des Startmenüs auf die richtige Sichtbarkeit für den Start
-        //startMenu.SetActive(true);
-        //aboutMenu.SetActive(false);
-        //creditsMenu.SetActive(false);
+
     }
 
     // Update is called once per frame
