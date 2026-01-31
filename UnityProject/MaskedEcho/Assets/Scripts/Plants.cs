@@ -5,6 +5,7 @@ using UnityEngine;
 public class Plants : MonoBehaviour
 {
     public GameObject Player;
+    public GameObject RainDrops;
     public float Health, MaxHealth;
 
 
@@ -69,10 +70,20 @@ public class Plants : MonoBehaviour
     {
         if (CanBeWatered())
         {
+            RainDrops.transform.position = transform.position + Vector3.up * 1f;
+            RainDrops.SetActive(true);
+            StartCoroutine(LetItRain());
             lastWateredDay = DayManager.Instance.CurrentDay;
             SetHealth(giveLife);
         }
         // Wenn schon gegossen → nix passiert, aber der Spieler verliert trotzdem Mana
+    }
+
+    IEnumerator LetItRain()
+    {
+        yield return new WaitForSeconds(3);
+        RainDrops.SetActive(false);
+
     }
     void ToggleBurning()
     {

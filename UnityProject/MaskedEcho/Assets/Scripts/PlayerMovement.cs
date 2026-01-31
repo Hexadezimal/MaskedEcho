@@ -44,7 +44,7 @@ using UnityEngine;
         controller.Move(velocity * Time.deltaTime);
     }
 }*/
-public class PlayerMovement : MonoBehaviour
+/*public class PlayerMovement : MonoBehaviour
 {
     public float walkSpeed = 6f;
     public float runSpeed = 12f;
@@ -98,5 +98,76 @@ public class PlayerMovement : MonoBehaviour
         characterController.Move(moveDirection * Time.deltaTime);
 
     }
+}*/
+
+
+public class PlayerMovement : MonoBehaviour
+{
+    public float walkSpeed = 6f;
+    public float runSpeed = 12f;
+    public float jumpPower = 7f;
+    public float gravity = 10f;
+    public float rotationSpeed = 10f;
+
+    public float defaultHeight = 2f;
+
+    private Vector3 moveDirection = Vector3.zero;
+    private CharacterController characterController;
+    private bool canMove = true;
+
+    void Start()
+    {
+        characterController = GetComponent<CharacterController>();
+    }
+
+    void Update()
+    {
+        // Bewegung entlang der Weltachsen (statische Kamera)
+        Vector3 forward = Vector3.forward;
+        Vector3 right = Vector3.right;
+
+        bool isRunning = Input.GetKey(KeyCode.LeftShift);
+        float speed = isRunning ? runSpeed : walkSpeed;
+
+        float inputZ = canMove ? Input.GetAxis("Vertical") : 0f;
+        float inputX = canMove ? Input.GetAxis("Horizontal") : 0f;
+
+        float movementDirectionY = moveDirection.y;
+
+        moveDirection = (forward * inputZ + right * inputX) * speed;
+        moveDirection.y = movementDirectionY;
+
+        // Springen
+        if (characterController.isGrounded)
+        {
+            if (Input.GetButton("Jump") && canMove)
+            {
+                moveDirection.y = jumpPower;
+            }
+        }
+        else
+        {
+            moveDirection.y -= gravity * Time.deltaTime;
+        }
+
+        // Rotation in Bewegungsrichtung
+        Vector3 lookDirection = new Vector3(moveDirection.x, 0f, moveDirection.z);
+        if (lookDirection.sqrMagnitude > 0.01f)
+        {
+            Quaternion targetRotation = Quaternion.LookRotation(-lookDirection);
+            transform.rotation = Quaternion.Slerp(
+                transform.rotation,
+                targetRotation,
+                rotationSpeed * Time.deltaTime
+            );
+        }
+
+        // CharacterController Settings
+        characterController.height = defaultHeight;
+
+        // Bewegung ausführen
+        characterController.Move(moveDirection * Time.deltaTime);
+    }
 }
+
 

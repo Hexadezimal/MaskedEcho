@@ -10,10 +10,17 @@ public class Player : MonoBehaviour
     public float burnInterval = 1f;
     public float Mana, MaxMana;
     public ScreenFader screenFader;
+    public GameObject playerMask;
 
     [SerializeField] private HealthbarUI healthBar;
     [SerializeField] private ManaBarUI ManaBar;
     [SerializeField] private float waterManaCost = 20f;
+    [SerializeField] private MeshRenderer meshRendererBG;
+    [SerializeField] private MeshRenderer meshRendererFloor;
+    [SerializeField] private Material BurningForestBGMaterial;
+    [SerializeField] private Material NormalForestBGMaterial;
+    [SerializeField] private Material BurningForestFloorMaterial;
+    [SerializeField] private Material NormalForestFloorMaterial;
 
     private bool isBurning;
     private Coroutine burnCoroutine;
@@ -26,6 +33,8 @@ public class Player : MonoBehaviour
         isBurning = false;
         healthBar.SetMaxHealth(MaxHealth);
         healthBar.SetHealth(Health);
+        meshRendererBG.material = NormalForestBGMaterial;
+        meshRendererFloor.material = NormalForestFloorMaterial;
     }
 
     // Update is called once per frame
@@ -72,15 +81,33 @@ public class Player : MonoBehaviour
 
         if (isBurning)
         {
+            playerMask.SetActive(true);
             burnCoroutine = StartCoroutine(BurnDamageOverTime());
+            UpdateMaterial();
         }
         else
         {
             if (burnCoroutine != null)
             {
+                playerMask.SetActive(false);
+                UpdateMaterial();
                 StopCoroutine(burnCoroutine);
                 burnCoroutine = null;
             }
+        }
+    }
+
+    void UpdateMaterial()
+    {
+        if (isBurning)
+        {
+            meshRendererBG.material = BurningForestBGMaterial;
+            meshRendererFloor.material = BurningForestFloorMaterial;
+        }
+        else
+        {
+            meshRendererBG.material = NormalForestBGMaterial;
+            meshRendererFloor.material = NormalForestFloorMaterial;
         }
     }
 
