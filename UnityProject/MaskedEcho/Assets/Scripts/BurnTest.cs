@@ -6,8 +6,8 @@ public class BurnTest : MonoBehaviour
 {
     public GameObject testObject;
     bool isBurning = false;
-    float burnMinValue = 0;
-    float burnMaxValue = 0;
+    /*float burnMinValue = 0;
+    float burnMaxValue = 0;*/
     float burnTransision = 0.0f;
     float currentBurnGrade = 0;
     // Start is called before the first frame update

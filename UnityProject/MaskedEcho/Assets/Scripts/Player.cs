@@ -8,12 +8,17 @@ public class Player : MonoBehaviour
     public float Health, MaxHealth;
     public float burnDamage = 5f;
     public float burnInterval = 1f;
+    public float Mana, MaxMana;
+
 
     [SerializeField]
     private HealthbarUI healthBar;
+    [SerializeField] 
+    private ManaBarUI ManaBar;
 
     private bool isBurning;
     private Coroutine burnCoroutine;
+    private bool plantNearby;
 
     void Start()
     {
@@ -29,8 +34,19 @@ public class Player : MonoBehaviour
         {
             ToggleBurning();
         }
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            if (plantNearby == true)
+            {
+                ReduceMana();
+            }
+        }
     }
 
+    public void ReduceMana()
+    {
+        SetMana(-20);
+    }
     void ToggleBurning()
     {
         isBurning = !isBurning;
@@ -64,5 +80,27 @@ public class Player : MonoBehaviour
         Health = Mathf.Clamp(Health, 0, MaxHealth);
 
         healthBar.SetHealth(Health);
+    }
+
+    public void SetMana(float manaChange)
+    {
+        Mana += manaChange;
+        Mana = Mathf.Clamp(Mana, 0, MaxMana);
+
+        ManaBar.SetMana(Mana);
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("Plant"))
+        {
+            plantNearby = true;
+        }
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        Debug.Log("out of trigger area");
+        plantNearby = false;
     }
 }
