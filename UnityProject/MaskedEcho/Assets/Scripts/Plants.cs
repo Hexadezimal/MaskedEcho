@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -15,10 +15,14 @@ public class Plants : MonoBehaviour
 
 
 
+
     private bool isBurning;
     private float giveLife = 5f;
     private bool playerNearby;
     private float healthBeforeBurn;
+
+    private int lastWateredDay = -1;
+
 
 
     void Start()
@@ -36,16 +40,40 @@ public class Plants : MonoBehaviour
             ToggleBurning();
         }
 
-        if (Input.GetKeyDown(KeyCode.R))
+        /*if (Input.GetKeyDown(KeyCode.R))
         {
             if(playerNearby == true)
             {
                 GetWatered();
             }
 
-        }
+        }*/
     }
 
+   /* public bool TryWater()
+    {
+        if (lastWateredDay == DayManager.Instance.CurrentDay)
+            return false;
+
+        lastWateredDay = DayManager.Instance.CurrentDay;
+        SetHealth(giveLife);
+        return true;
+    }*/
+    public bool CanBeWatered()
+    {
+        // Gibt nur true zurück, wenn die Pflanze noch nicht gegossen wurde heute
+        return lastWateredDay != DayManager.Instance.CurrentDay;
+    }
+
+    public void Water()
+    {
+        if (CanBeWatered())
+        {
+            lastWateredDay = DayManager.Instance.CurrentDay;
+            SetHealth(giveLife);
+        }
+        // Wenn schon gegossen → nix passiert, aber der Spieler verliert trotzdem Mana
+    }
     void ToggleBurning()
     {
         isBurning = !isBurning;
@@ -87,6 +115,15 @@ public class Plants : MonoBehaviour
     }
     public void GetWatered()
     {
+        //SetHealth(giveLife);
+        if (lastWateredDay == DayManager.Instance.CurrentDay)
+        {
+            Debug.Log("Plant already watered today");
+            return;
+        }
+
+        // Accept water
+        lastWateredDay = DayManager.Instance.CurrentDay;
         SetHealth(giveLife);
     }
 
