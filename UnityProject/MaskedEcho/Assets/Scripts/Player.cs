@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class Player : MonoBehaviour
 {
@@ -11,12 +12,16 @@ public class Player : MonoBehaviour
     public float Mana, MaxMana;
     public ScreenFader screenFader;
     public GameObject playerMask;
+    public GameObject normalMask;
+    public GameObject noManaText;
 
     [SerializeField] private HealthbarUI healthBar;
     [SerializeField] private ManaBarUI ManaBar;
     [SerializeField] private float waterManaCost = 20f;
     [SerializeField] private MeshRenderer meshRendererBG;
     [SerializeField] private MeshRenderer meshRendererFloor;
+    [SerializeField] private MeshRenderer meshRendererBGSideWall_Left;
+    [SerializeField] private MeshRenderer meshRendererBGSideWall_Right;
     [SerializeField] private Material BurningForestBGMaterial;
     [SerializeField] private Material NormalForestBGMaterial;
     [SerializeField] private Material BurningForestFloorMaterial;
@@ -26,6 +31,8 @@ public class Player : MonoBehaviour
     private Coroutine burnCoroutine;
     //private bool plantNearby;
     private Plants nearbyPlant;
+    private bool isDead = false;
+
 
 
     void Start()
@@ -35,6 +42,8 @@ public class Player : MonoBehaviour
         healthBar.SetHealth(Health);
         meshRendererBG.material = NormalForestBGMaterial;
         meshRendererFloor.material = NormalForestFloorMaterial;
+        meshRendererBGSideWall_Left.material = NormalForestBGMaterial;
+        meshRendererBGSideWall_Right.material = NormalForestBGMaterial;
     }
 
     // Update is called once per frame
@@ -58,6 +67,8 @@ public class Player : MonoBehaviour
 
         if (Mana < waterManaCost)
         {
+            noManaText.SetActive(true);
+            StartCoroutine(NoManaGoSleep());
             Debug.Log("Nicht genug Mana");
             return;
         }
@@ -68,6 +79,12 @@ public class Player : MonoBehaviour
         // Pflanze heilt nur, wenn noch nicht gegossen
         nearbyPlant.Water();
 
+    }
+
+    IEnumerator NoManaGoSleep()
+    {
+        yield return new WaitForSeconds(3);
+        noManaText.SetActive(false);
     }
 
 
@@ -82,6 +99,7 @@ public class Player : MonoBehaviour
         if (isBurning)
         {
             playerMask.SetActive(true);
+            normalMask.SetActive(false);
             burnCoroutine = StartCoroutine(BurnDamageOverTime());
             UpdateMaterial();
         }
@@ -90,6 +108,7 @@ public class Player : MonoBehaviour
             if (burnCoroutine != null)
             {
                 playerMask.SetActive(false);
+                normalMask.SetActive(true);
                 UpdateMaterial();
                 StopCoroutine(burnCoroutine);
                 burnCoroutine = null;
@@ -102,11 +121,15 @@ public class Player : MonoBehaviour
         if (isBurning)
         {
             meshRendererBG.material = BurningForestBGMaterial;
+            meshRendererBGSideWall_Left.material = BurningForestBGMaterial;
+            meshRendererBGSideWall_Right.material = BurningForestBGMaterial;
             meshRendererFloor.material = BurningForestFloorMaterial;
         }
         else
         {
             meshRendererBG.material = NormalForestBGMaterial;
+            meshRendererBGSideWall_Left.material = NormalForestBGMaterial;
+            meshRendererBGSideWall_Right.material = NormalForestBGMaterial;
             meshRendererFloor.material = NormalForestFloorMaterial;
         }
     }
@@ -122,10 +145,23 @@ public class Player : MonoBehaviour
 
     public void SetHealth(float healthChange)
     {
+        /*Health += healthChange;
+        Health = Mathf.Clamp(Health, 0, MaxHealth);
+
+        healthBar.SetHealth(Health);*/
+
+        if (isDead)
+            return;
+
         Health += healthChange;
         Health = Mathf.Clamp(Health, 0, MaxHealth);
 
         healthBar.SetHealth(Health);
+
+        if (Health <= 0)
+        {
+            Die();
+        }
     }
 
     public void SetMana(float manaChange)
@@ -172,5 +208,26 @@ public class Player : MonoBehaviour
         yield return new WaitForSeconds(1f);
         DayManager.Instance.NextDay();
         SetMana(MaxMana);
+        if (Health < 100)
+        {
+            SetHealth(20);
+        }
+    }
+
+    void Die()
+    {
+        isDead = true;
+
+        // Brennen stoppen
+        if (burnCoroutine != null)
+        {
+            StopCoroutine(burnCoroutine);
+            burnCoroutine = null;
+        }
+
+        Debug.Log("Game Over --> Szenenwechsel");
+
+        // Szene wechseln
+        //SceneManager.LoadScene("GameOver");
     }
 }
