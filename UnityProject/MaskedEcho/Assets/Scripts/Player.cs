@@ -227,7 +227,9 @@ public class Player : MonoBehaviour
 
         Debug.Log("Game Over --> Szenenwechsel");
 
-        // Szene wechseln
-        //SceneManager.LoadScene("GameOver");
+        if (DayManager.Instance != null)
+        {
+            DayManager.Instance.TriggerGameOver(GameResult.Lose);
+        }
     }
 }

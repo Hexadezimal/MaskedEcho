@@ -8,15 +8,14 @@ public class Plants : MonoBehaviour
     public GameObject RainDrops;
     public float Health, MaxHealth;
 
-
+    [SerializeField] private float dryDamagePerDay = 10f;
     [SerializeField] private HealthbarUI healthBar;
     [SerializeField] private MeshRenderer meshRenderer;
     [SerializeField] private Material healthyMaterial;
     [SerializeField] private Material damagedMaterial;
+    [SerializeField] private Material deadMaterial;
 
-
-
-
+    private bool isDead;
     private bool isBurning;
     private float giveLife = 10f;
     private bool playerNearby;
@@ -41,15 +40,6 @@ public class Plants : MonoBehaviour
         {
             ToggleBurning();
         }
-
-        /*if (Input.GetKeyDown(KeyCode.R))
-        {
-            if(playerNearby == true)
-            {
-                GetWatered();
-            }
-
-        }*/
     }
 
    /* public bool TryWater()
@@ -69,13 +59,20 @@ public class Plants : MonoBehaviour
 
     public void Water()
     {
+        if (isDead)
+            return;
+
         if (CanBeWatered())
         {
-            RainDrops.transform.position = transform.position + Vector3.up * 1f;
-            RainDrops.SetActive(true);
-            StartCoroutine(LetItRain());
             lastWateredDay = DayManager.Instance.CurrentDay;
             SetHealth(giveLife);
+
+            if (RainDrops != null)
+            {
+                RainDrops.transform.position = transform.position;
+                RainDrops.SetActive(true);
+                StartCoroutine(LetItRain());
+            }
         }
         // Wenn schon gegossen → nix passiert, aber der Spieler verliert trotzdem Mana
     }
@@ -105,17 +102,26 @@ public class Plants : MonoBehaviour
 
     public void SetHealth(float healthChange)
     {
+        if (isDead)
+            return;
+
         Health += healthChange;
         Health = Mathf.Clamp(Health, 0, MaxHealth);
 
         healthBar.SetHealth(Health);
-        Debug.Log(Health);
         UpdateMaterial();
 
+        if (Health <= 0)
+        {
+            Die();
+        }
     }
 
     void UpdateMaterial()
     {
+        if (isDead)
+            return;
+
         if (Health >= MaxHealth)
         {
             meshRenderer.material = healthyMaterial;
@@ -152,5 +158,31 @@ public class Plants : MonoBehaviour
     {
         Debug.Log("out of trigger area");
         playerNearby = false;
+    }
+
+    void Die()
+    {
+        isDead = true;
+
+        Health = 0;
+        healthBar.SetHealth(0);
+
+        meshRenderer.material = deadMaterial;
+
+        Debug.Log($"{gameObject.name} ist gestorben... du magst wohl deine Pflanzen nicht besonders...schäm dich");
+    }
+
+    public void OnNewDay(int currentDay)
+    {
+        if (lastWateredDay == -1)
+            return; // noch nie gegossen → kein Schaden
+
+        int daysWithoutWater = currentDay - lastWateredDay - 1;
+
+        if (daysWithoutWater >= 2)
+        {
+            float damage = dryDamagePerDay * (daysWithoutWater - 1);
+            SetHealth(-damage);
+        }
     }
 }

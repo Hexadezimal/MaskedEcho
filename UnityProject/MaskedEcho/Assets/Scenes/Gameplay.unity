@@ -5540,10 +5540,12 @@ MonoBehaviour:
   RainDrops: {fileID: 108785956}
   Health: 50
   MaxHealth: 100
+  dryDamagePerDay: 10
   healthBar: {fileID: 908589387}
   meshRenderer: {fileID: 2061969242}
   healthyMaterial: {fileID: 2100000, guid: fbffb3860663556419ac12a8cacb1331, type: 2}
   damagedMaterial: {fileID: 2100000, guid: 187b87f2a30859d41b204157ea66e39f, type: 2}
+  deadMaterial: {fileID: 2100000, guid: 5e0f17d5387d0f0429815ec5a2d949ee, type: 2}
 --- !u!65 &469187863
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -20306,10 +20308,12 @@ MonoBehaviour:
   RainDrops: {fileID: 108785956}
   Health: 40
   MaxHealth: 100
+  dryDamagePerDay: 10
   healthBar: {fileID: 878789904}
   meshRenderer: {fileID: 1626062458}
   healthyMaterial: {fileID: 2100000, guid: fbffb3860663556419ac12a8cacb1331, type: 2}
   damagedMaterial: {fileID: 2100000, guid: 187b87f2a30859d41b204157ea66e39f, type: 2}
+  deadMaterial: {fileID: 2100000, guid: 5e0f17d5387d0f0429815ec5a2d949ee, type: 2}
 --- !u!1 &1282592324
 GameObject:
   m_ObjectHideFlags: 0
@@ -25763,10 +25767,12 @@ MonoBehaviour:
   RainDrops: {fileID: 108785956}
   Health: 20
   MaxHealth: 100
+  dryDamagePerDay: 10
   healthBar: {fileID: 213113866}
   meshRenderer: {fileID: 1987640160}
   healthyMaterial: {fileID: 2100000, guid: fbffb3860663556419ac12a8cacb1331, type: 2}
   damagedMaterial: {fileID: 2100000, guid: 187b87f2a30859d41b204157ea66e39f, type: 2}
+  deadMaterial: {fileID: 2100000, guid: 5e0f17d5387d0f0429815ec5a2d949ee, type: 2}
 --- !u!65 &1658056616
 BoxCollider:
   m_ObjectHideFlags: 0

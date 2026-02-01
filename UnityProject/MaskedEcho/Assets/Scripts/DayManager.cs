@@ -1,5 +1,6 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 /*public class DayManager : MonoBehaviour
 {
@@ -27,9 +28,12 @@ using UnityEngine;
         dayspassed.text = CurrentDay.ToString();
     }
 }*/
-using TMPro;
-using UnityEngine;
-using UnityEngine.SceneManagement;
+public enum GameResult
+{
+    None,
+    Win,
+    Lose
+}
 
 public class DayManager : MonoBehaviour
 {
@@ -41,20 +45,28 @@ public class DayManager : MonoBehaviour
     public int limitDays = 7;
     public int CurrentDay { get; private set; } = 1;
 
+    public GameResult Result { get; private set; } = GameResult.None;
+
     private void Awake()
     {
         if (Instance == null)
+        {
             Instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
         else
+        {
             Destroy(gameObject);
+        }
     }
+
 
     private void Start()
     {
         UpdateUI();
     }
 
-    public void NextDay()
+    /*public void NextDay()
     {
         CurrentDay++;
         UpdateUI();
@@ -63,7 +75,26 @@ public class DayManager : MonoBehaviour
         {
             CheckWinCondition();
         }
+    }*/
+
+    public void NextDay()
+    {
+        CurrentDay++;
+        UpdateUI();
+
+        Plants[] allPlants = FindObjectsOfType<Plants>();
+
+        foreach (Plants plant in allPlants)
+        {
+            plant.OnNewDay(CurrentDay);
+        }
+
+        if (CurrentDay > limitDays)
+        {
+            CheckWinCondition();
+        }
     }
+
 
     void UpdateUI()
     {
@@ -89,16 +120,29 @@ public class DayManager : MonoBehaviour
         WinGame();
     }
 
+
+
+
     void WinGame()
     {
         Debug.Log("GEWONNEN!--> Szenenwechsel");
+        Result = GameResult.Win;
+        SceneManager.LoadScene("GameOver");
         //SceneManager.LoadScene("WinScene");
     }
 
     void LoseGame()
     {
         Debug.Log("VERLOREN!--> Szenenwechsel");
+        Result = GameResult.Lose;
+        SceneManager.LoadScene("GameOver");
         //SceneManager.LoadScene("LoseScene");
+    }
+
+    public void TriggerGameOver(GameResult result)
+    {
+        Result = result;
+        SceneManager.LoadScene("GameOver");
     }
 
 }
