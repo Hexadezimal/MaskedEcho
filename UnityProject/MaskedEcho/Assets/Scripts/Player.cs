@@ -14,6 +14,9 @@ public class Player : MonoBehaviour
     public GameObject playerMask;
     public GameObject normalMask;
     public GameObject noManaText;
+    public AudioSource burningSound;
+    public AudioSource ForestSound;
+    public AudioSource maskSound;
 
     [SerializeField] private HealthbarUI healthBar;
     [SerializeField] private ManaBarUI ManaBar;
@@ -51,6 +54,9 @@ public class Player : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.F))
         {
+            if (maskSound != null && !maskSound.isPlaying)
+                maskSound.Play();
+
             ToggleBurning();
         }
         if (Input.GetKeyDown(KeyCode.R))
@@ -92,7 +98,7 @@ public class Player : MonoBehaviour
     {
         SetMana(-20);
     }
-    void ToggleBurning()
+    /*void ToggleBurning()
     {
         isBurning = !isBurning;
 
@@ -114,7 +120,61 @@ public class Player : MonoBehaviour
                 burnCoroutine = null;
             }
         }
+    }*/
+
+    void ToggleBurning()
+    {
+        isBurning = !isBurning;
+
+        Plants[] allPlants = FindObjectsOfType<Plants>();
+
+        if (isBurning)
+        {
+            playerMask.SetActive(true);
+            normalMask.SetActive(false);
+
+            foreach (Plants plant in allPlants)
+            {
+                plant.EnterFuturePreview();
+            }
+
+            burnCoroutine = StartCoroutine(BurnDamageOverTime());
+            UpdateMaterial();
+
+            if (burningSound != null && !burningSound.isPlaying)
+                burningSound.Play();
+
+            // Wald-Sound stoppen
+            if (ForestSound != null && ForestSound.isPlaying)
+                ForestSound.Stop();
+        }
+        else
+        {
+            playerMask.SetActive(false);
+            normalMask.SetActive(true);
+
+            foreach (Plants plant in allPlants)
+            {
+                plant.ExitFuturePreview();
+            }
+
+            if (burnCoroutine != null)
+            {
+                StopCoroutine(burnCoroutine);
+                burnCoroutine = null;
+            }
+
+            UpdateMaterial();
+
+            if (burningSound != null && burningSound.isPlaying)
+                burningSound.Stop();
+
+            // Wald-Sound starten
+            if (ForestSound != null && !ForestSound.isPlaying)
+                ForestSound.Play();
+        }
     }
+
 
     void UpdateMaterial()
     {

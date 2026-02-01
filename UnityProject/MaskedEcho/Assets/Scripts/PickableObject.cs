@@ -54,4 +54,5 @@ public class PickableObject : MonoBehaviour
         useMaskText.SetActive(false);
         this.gameObject.SetActive(false);
     }
+
 }

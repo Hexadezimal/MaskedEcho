@@ -7,20 +7,30 @@ public class Plants : MonoBehaviour
     public GameObject Player;
     public GameObject RainDrops;
     public float Health, MaxHealth;
+    //public GameObject letsrainText;
+    public AudioSource rainSound;
 
     [SerializeField] private float dryDamagePerDay = 10f;
     [SerializeField] private HealthbarUI healthBar;
-    [SerializeField] private MeshRenderer meshRenderer;
+    //[SerializeField] private MeshRenderer meshRenderer;
+    //[SerializeField] private List<MeshRenderer> meshRenderers = new List<MeshRenderer>();
+    [Header("Plant Meshes")]
+    [SerializeField] private List<MeshRenderer> plantRenderers = new List<MeshRenderer>();
+    [Header("Fire Meshes")]
+    [SerializeField] private List<MeshRenderer> fireRenderers = new List<MeshRenderer>();
     [SerializeField] private Material healthyMaterial;
     [SerializeField] private Material damagedMaterial;
     [SerializeField] private Material deadMaterial;
+    [SerializeField] private Material fireOnMaterial;
+
+
 
     private bool isDead;
     private bool isBurning;
     private float giveLife = 10f;
     private bool playerNearby;
     private float healthBeforeBurn;
-
+    private bool isPreviewMode;
     private int lastWateredDay = -1;
 
 
@@ -69,8 +79,12 @@ public class Plants : MonoBehaviour
 
             if (RainDrops != null)
             {
-                RainDrops.transform.position = transform.position;
+                Vector3 offset = new Vector3(0f, 0.7f, -0.2f); // nach oben
+                RainDrops.transform.position = transform.position + offset;
+                //RainDrops.transform.position = transform.position;
                 RainDrops.SetActive(true);
+                if (rainSound != null && !rainSound.isPlaying)
+                    rainSound.Play();
                 StartCoroutine(LetItRain());
             }
         }
@@ -81,9 +95,11 @@ public class Plants : MonoBehaviour
     {
         yield return new WaitForSeconds(3);
         RainDrops.SetActive(false);
+        if (rainSound != null && rainSound.isPlaying)
+            rainSound.Stop();
 
     }
-    void ToggleBurning()
+    /*void ToggleBurning()
     {
         isBurning = !isBurning;
 
@@ -98,9 +114,27 @@ public class Plants : MonoBehaviour
             healthBar.SetHealth(Health);
             UpdateMaterial();
         }
+    }*/
+    void ToggleBurning()
+    {
+        isBurning = !isBurning;
+
+        if (isBurning)
+        {
+            healthBeforeBurn = Health;
+            SetHealth(-50);
+        }
+        else
+        {
+            Health = healthBeforeBurn;
+            healthBar.SetHealth(Health);
+        }
+
+        UpdateMaterial();
     }
 
-    public void SetHealth(float healthChange)
+
+    /*public void SetHealth(float healthChange)
     {
         if (isDead)
             return;
@@ -115,9 +149,27 @@ public class Plants : MonoBehaviour
         {
             Die();
         }
+    }*/
+
+    public void SetHealth(float healthChange)
+    {
+        if (isDead && !isPreviewMode)
+            return;
+
+        Health += healthChange;
+        Health = Mathf.Clamp(Health, 0, MaxHealth);
+
+        healthBar.SetHealth(Health);
+        UpdateMaterial();
+
+        if (Health <= 0 && !isPreviewMode)
+        {
+            Die();
+        }
     }
 
-    void UpdateMaterial()
+
+    /*void UpdateMaterial()
     {
         if (isDead)
             return;
@@ -130,7 +182,109 @@ public class Plants : MonoBehaviour
         {
             meshRenderer.material = damagedMaterial;
         }
+    }*/
+
+    /*void UpdateMaterial()
+    {
+        if (!isPreviewMode && isDead)
+            return;
+
+        if (Health <= 0)
+        {
+            meshRenderer.material = deadMaterial;
+        }
+        else if (Health >= MaxHealth)
+        {
+            meshRenderer.material = healthyMaterial;
+        }
+        else
+        {
+            meshRenderer.material = damagedMaterial;
+        }
+    }*/
+
+    /* void UpdateMaterial()
+     {
+         Material targetMaterial;
+
+         if (isDead)
+         {
+             targetMaterial = deadMaterial;
+         }
+         else if (Health >= MaxHealth)
+         {
+             targetMaterial = healthyMaterial;
+         }
+         else
+         {
+             targetMaterial = damagedMaterial;
+         }
+
+         foreach (MeshRenderer renderer in meshRenderers)
+         {
+             if (renderer != null)
+             {
+                 renderer.material = targetMaterial;
+             }
+         }
+     }*/
+
+    void UpdateMaterial()
+    {
+        // 🌿 Pflanzen-Material
+        Material plantMaterial;
+
+        if (isDead)
+        {
+            plantMaterial = deadMaterial;
+        }
+        else if (Health >= MaxHealth)
+        {
+            plantMaterial = healthyMaterial;
+        }
+        else
+        {
+            plantMaterial = damagedMaterial;
+        }
+
+        foreach (MeshRenderer renderer in plantRenderers)
+        {
+            if (renderer != null)
+                renderer.material = plantMaterial;
+        }
+
+        // 🔥 Feuer-Material
+        foreach (MeshRenderer renderer in fireRenderers)
+        {
+            if (renderer == null)
+                continue;
+
+            if (isBurning)
+            {
+                renderer.enabled = true;
+                renderer.material = fireOnMaterial;
+            }
+            else
+            {
+                renderer.enabled = false; // komplett unsichtbar
+            }
+        }
     }
+
+    public void EnterFuturePreview()
+    {
+        isPreviewMode = true;
+    }
+
+    public void ExitFuturePreview()
+    {
+        isPreviewMode = false;
+
+        // Zustand neu bewerten
+        isDead = Health <= 0;
+        UpdateMaterial();
+    }
+
     public void GetWatered()
     {
         //SetHealth(giveLife);
@@ -150,6 +304,7 @@ public class Plants : MonoBehaviour
         Debug.Log("Was triggered by " + other.name);
         if (other.name == "Player")
         {
+            //letsrainText.SetActive(true);
             playerNearby = true;
         }
     }
@@ -157,6 +312,7 @@ public class Plants : MonoBehaviour
     private void OnTriggerExit(Collider other)
     {
         Debug.Log("out of trigger area");
+        //letsrainText.SetActive(true);
         playerNearby = false;
     }
 
@@ -167,11 +323,10 @@ public class Plants : MonoBehaviour
         Health = 0;
         healthBar.SetHealth(0);
 
-        meshRenderer.material = deadMaterial;
+        UpdateMaterial();
 
-        Debug.Log($"{gameObject.name} ist gestorben... du magst wohl deine Pflanzen nicht besonders...schäm dich");
+        Debug.Log($"{gameObject.name} ist gestorben... du magst wohl deine Pflanzen nicht besonders... schäm dich");
     }
-
     public void OnNewDay(int currentDay)
     {
         if (lastWateredDay == -1)
