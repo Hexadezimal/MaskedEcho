@@ -33,7 +33,7 @@ public class EyeControll : MonoBehaviour
         //var mouseWorldCoord = camera.ScreenToWorldPoint(Input.mousePosition);
 
         /* Get a vector pointing from initialPosition to the target. Vector shouldn't be longer than maxDistance. */
-        var originToMouse = Input.mousePosition - this.transform.localPosition;
+        var originToMouse = Input.mousePosition - (this.transform.localPosition*2.4f);
         Debug.Log(originToMouse);
         originToMouse = Vector3.ClampMagnitude(originToMouse, intensity);
 
